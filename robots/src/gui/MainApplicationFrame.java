@@ -2,17 +2,10 @@ package gui;
 
 import java.awt.Dimension;
 import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 
-import javax.swing.JDesktopPane;
-import javax.swing.JFrame;
-import javax.swing.JInternalFrame;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
-import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
+import javax.swing.*;
 
 import log.Logger;
 
@@ -52,10 +45,10 @@ public class MainApplicationFrame extends JFrame
     protected LogWindow createLogWindow()
     {
         LogWindow logWindow = new LogWindow(Logger.getDefaultLogSource());
-        logWindow.setLocation(10,10);
-        logWindow.setSize(300, 800);
-        setMinimumSize(logWindow.getSize());
-        logWindow.pack();
+//        logWindow.setLocation(10,10);
+//        logWindow.setSize(300, 800);
+//        setMinimumSize(logWindow.getSize());
+//        logWindow.pack();
         Logger.debug("Протокол работает");
         return logWindow;
     }
@@ -66,38 +59,59 @@ public class MainApplicationFrame extends JFrame
         frame.setVisible(true);
     }
     
-//    protected JMenuBar createMenuBar() {
-//        JMenuBar menuBar = new JMenuBar();
-// 
-//        //Set up the lone menu.
-//        JMenu menu = new JMenu("Document");
-//        menu.setMnemonic(KeyEvent.VK_D);
-//        menuBar.add(menu);
-// 
-//        //Set up the first menu item.
-//        JMenuItem menuItem = new JMenuItem("New");
-//        menuItem.setMnemonic(KeyEvent.VK_N);
-//        menuItem.setAccelerator(KeyStroke.getKeyStroke(
-//                KeyEvent.VK_N, ActionEvent.ALT_MASK));
-//        menuItem.setActionCommand("new");
-////        menuItem.addActionListener(this);
-//        menu.add(menuItem);
-// 
-//        //Set up the second menu item.
-//        menuItem = new JMenuItem("Quit");
-//        menuItem.setMnemonic(KeyEvent.VK_Q);
-//        menuItem.setAccelerator(KeyStroke.getKeyStroke(
-//                KeyEvent.VK_Q, ActionEvent.ALT_MASK));
-//        menuItem.setActionCommand("quit");
-////        menuItem.addActionListener(this);
-//        menu.add(menuItem);
-// 
-//        return menuBar;
-//    }
-    
     private JMenuBar generateMenuBar()
     {
         JMenuBar menuBar = new JMenuBar();
+
+        JMenu menu = new JMenu("Меню");
+        menu.setMnemonic(KeyEvent.VK_D);
+        menuBar.add(menu);
+
+        JMenuItem menuItem = new JMenuItem("Новое игровое поле");
+        menuItem.setMnemonic(KeyEvent.VK_N);
+        menuItem.setAccelerator(KeyStroke.getKeyStroke(
+                KeyEvent.VK_N, ActionEvent.ALT_MASK));
+        menuItem.setActionCommand("окно");
+        menuItem.addActionListener((event) -> {
+            GameWindow newGameWindow = new GameWindow();
+            newGameWindow.setSize(400, 400);
+            addWindow(newGameWindow);
+        });
+        menu.add(menuItem);
+
+        JMenuItem LogItem = new JMenuItem("Окно логов");
+        LogItem.setMnemonic(KeyEvent.VK_L);
+        LogItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_L, ActionEvent.ALT_MASK)); // Исправлено на VK_L
+        LogItem.setActionCommand("Лог");
+
+        LogItem.addActionListener((event) -> {
+            LogWindow logWindow = new LogWindow(Logger.getDefaultLogSource());
+            addWindow(logWindow);
+        });
+        menu.add(LogItem);
+
+
+        menuItem = new JMenuItem("Выход");
+        menuItem.setMnemonic(KeyEvent.VK_Q);
+        menuItem.setAccelerator(KeyStroke.getKeyStroke(
+                KeyEvent.VK_Q, ActionEvent.ALT_MASK));
+        menuItem.setActionCommand("выход");
+        menuItem.addActionListener((event) -> {
+            String message = "Вы уверены, что хотите выйти?";
+            UIManager.put("OptionPane.yesButtonText", "Да");
+            UIManager.put("OptionPane.noButtonText", "Нет");
+            int confirmation = JOptionPane.showConfirmDialog(this, message, "Подтверждение выхода", JOptionPane.YES_NO_OPTION);
+            if (confirmation == JOptionPane.YES_OPTION) {
+                JMenuItem source = (JMenuItem) event.getSource();
+                JFrame frame = (JFrame) SwingUtilities.getWindowAncestor(source);
+                if (frame == null) {
+                    this.dispose();
+                }
+            }
+        });
+        menu.add(menuItem);
+
+
         
         JMenu lookAndFeelMenu = new JMenu("Режим отображения");
         lookAndFeelMenu.setMnemonic(KeyEvent.VK_V);
