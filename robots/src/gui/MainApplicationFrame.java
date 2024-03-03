@@ -63,9 +63,20 @@ public class MainApplicationFrame extends JFrame
     }
 
     private JMenu createFileMenu() {
+
         JMenu menu = new JMenu("Меню");
         menu.setMnemonic(KeyEvent.VK_D);
 
+        menu.add(newGameField());
+
+        menu.add(newWindowLog());
+
+        menu.add(exit());
+
+        return menu;
+    }
+
+    private JMenuItem newGameField(){
         JMenuItem menuItem = new JMenuItem("Новое игровое поле");
         menuItem.setMnemonic(KeyEvent.VK_N);
         menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, ActionEvent.ALT_MASK));
@@ -74,8 +85,10 @@ public class MainApplicationFrame extends JFrame
             newGameWindow.setSize(400, 400);
             addWindow(newGameWindow);
         });
-        menu.add(menuItem);
+        return menuItem;
+    }
 
+    private JMenuItem newWindowLog(){
         JMenuItem LogItem = new JMenuItem("Окно логов");
         LogItem.setMnemonic(KeyEvent.VK_L);
         LogItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_L, ActionEvent.ALT_MASK));
@@ -83,17 +96,7 @@ public class MainApplicationFrame extends JFrame
             LogWindow logWindow = new LogWindow(Logger.getDefaultLogSource());
             addWindow(logWindow);
         });
-        menu.add(LogItem);
-
-        JMenuItem exitMenuItem = new JMenuItem("Выход");
-        exitMenuItem.setMnemonic(KeyEvent.VK_Q);
-        exitMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, ActionEvent.ALT_MASK));
-        exitMenuItem.addActionListener((event) -> {
-            exitApplication();
-        });
-        menu.add(exitMenuItem);
-
-        return menu;
+        return LogItem;
     }
 
     private JMenu createLookAndFeelMenu() {
@@ -116,6 +119,16 @@ public class MainApplicationFrame extends JFrame
         lookAndFeelMenu.add(crossplatformLookAndFeel);
 
         return lookAndFeelMenu;
+    }
+
+    private JMenuItem exit(){
+        JMenuItem exitMenuItem = new JMenuItem("Выход");
+        exitMenuItem.setMnemonic(KeyEvent.VK_Q);
+        exitMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, ActionEvent.ALT_MASK));
+        exitMenuItem.addActionListener((event) -> {
+            exitApplication();
+        });
+        return exitMenuItem;
     }
 
     private JMenu createTestMenu() {
