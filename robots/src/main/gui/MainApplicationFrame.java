@@ -29,9 +29,7 @@ public class MainApplicationFrame extends JFrame
 
         LogWindow logWindow = createLogWindow();
         addWindow(logWindow, 150, 350);
-
-        GameWindow gameWindow = new GameWindow();
-        addWindow(gameWindow, 400, 400);
+        addWindow(new GameWindow(), 400, 400);
 
         setJMenuBar(generateMenuBar());
         setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -101,19 +99,15 @@ public class MainApplicationFrame extends JFrame
         lookAndFeelMenu.setMnemonic(KeyEvent.VK_V);
         lookAndFeelMenu.getAccessibleContext().setAccessibleDescription(messages.getString("ModeControl"));
 
-        JMenuItem systemLookAndFeel = new JMenuItem(messages.getString("SystemDiagram"), KeyEvent.VK_S);
-        systemLookAndFeel.addActionListener((event) -> {
+        lookAndFeelMenu.add(createMenuItem(messages.getString("SystemDiagram"), KeyEvent.VK_S, null, (event) -> {
             setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
             this.invalidate();
-        });
-        lookAndFeelMenu.add(systemLookAndFeel);
+        }));
 
-        JMenuItem crossplatformLookAndFeel = new JMenuItem(messages.getString("UniversalScheme"), KeyEvent.VK_U);
-        crossplatformLookAndFeel.addActionListener((event) -> {
+        lookAndFeelMenu.add(createMenuItem(messages.getString("UniversalScheme"), KeyEvent.VK_U, null, (event) -> {
             setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
             this.invalidate();
-        });
-        lookAndFeelMenu.add(crossplatformLookAndFeel);
+        }));
 
         return lookAndFeelMenu;
     }
@@ -148,7 +142,6 @@ public class MainApplicationFrame extends JFrame
             SwingUtilities.updateComponentTreeUI(this);
         } catch (ClassNotFoundException | InstantiationException
                  | IllegalAccessException | UnsupportedLookAndFeelException e) {
-            // just ignore
         }
     }
 
