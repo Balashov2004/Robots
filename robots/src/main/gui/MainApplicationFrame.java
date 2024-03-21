@@ -193,23 +193,26 @@ public class MainApplicationFrame extends JFrame {
         int confirmation = JOptionPane.showConfirmDialog(this, messages.getString("ConfirmationExitQuestion"),
                 messages.getString("ConfirmationExit"), JOptionPane.YES_NO_OPTION);
         if (confirmation == JOptionPane.YES_OPTION) {
-            ArrayList<HashMap<String, Object>> frames = new ArrayList<HashMap<String, Object>>();
-            for (JInternalFrame frame : desktopPane.getAllFrames())
-            {
-                frames.add(getProperties(frame));
-            }
-            FileOutputStream fos;
-            try {
-                fos = new FileOutputStream("./temp.out");
-                ObjectOutputStream oos;
-                oos = new ObjectOutputStream(fos);
-                oos.writeObject(frames);
-                oos.flush();
-                oos.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            save();
             this.dispose();
+        }
+    }
+    private void save(){
+        ArrayList<HashMap<String, Object>> frames = new ArrayList<HashMap<String, Object>>();
+        for (JInternalFrame frame : desktopPane.getAllFrames())
+        {
+            frames.add(getProperties(frame));
+        }
+        FileOutputStream fos;
+        try {
+            fos = new FileOutputStream("./temp.out");
+            ObjectOutputStream oos;
+            oos = new ObjectOutputStream(fos);
+            oos.writeObject(frames);
+            oos.flush();
+            oos.close();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }
