@@ -3,78 +3,54 @@ package gui;
 
 import java.awt.*;
 import java.awt.event.*;
-import java.beans.PropertyVetoException;
-import java.io.*;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.ResourceBundle;
 import java.util.Locale;
 import javax.swing.*;
 import log.Logger;
 
-public class MainApplicationFrame extends JFrame {
+public class MainApplicationFrame extends JFrame{
     Locale currentLocale = new Locale("ru", "RU");
     ResourceBundle messages = ResourceBundle.getBundle("resources", currentLocale);
-    private final JDesktopPane desktopPane = new JDesktopPane();
 
-    public HashMap<String, Object> getProperties(JInternalFrame frame) {
-        HashMap<String, Object> result = new HashMap<String, Object>();
-        result.put("Location", frame.getLocation());
-        result.put("Size", frame.getSize());
-        result.put("Selected", frame.isSelected());
-        if (frame instanceof LogWindow)
-            result.put("Type", "Log");
-        else if (frame instanceof GameWindow)
-            result.put("Type", "Game");
-        return result;
-    }
+    private JDesktopPane desktopPane;
+
 
     public MainApplicationFrame() {
-        int inset = 50;
+        Integer indent = 50;
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-        setBounds(inset, inset,
-                screenSize.width - inset * 2,
-                screenSize.height - inset * 2);
 
-        setContentPane(desktopPane);
+        final int indentedWidth = screenSize.width - indent * 2;
+        final int indentedHeight = screenSize.height - indent * 2;
+
+        setBounds(indent, indent, indentedWidth, indentedHeight);
+
+        setContentPane(createDesktopPane());
         setJMenuBar(generateMenuBar());
         setDefaultCloseOperation(EXIT_ON_CLOSE);
 
-        try (FileInputStream is = new FileInputStream("./temp.out")) {
-            try {
-                ObjectInputStream ois = new ObjectInputStream(new BufferedInputStream(is));
-                try {
-                    ArrayList<HashMap<String, Object>> restored = (ArrayList<HashMap<String, Object>>) ois.readObject();
-                    for (HashMap<String, Object> frame : restored) {
-                        if (frame.get("Type").equals("Log")) {
-                            LogWindow logWindow = createLogWindow();
-                            logWindow.setLocation((Point) frame.get("Location"));
-                            logWindow.setSize((Dimension) frame.get("Size"));
-                            logWindow.setSelected((boolean) frame.get("Selected"));
-                            addWindow(logWindow, 150, 350);
-                        }
-                        if (frame.get("Type").equals("Game")) {
-                            GameWindow gameWindow = new GameWindow();
-                            gameWindow.setLocation((Point) frame.get("Location"));
-                            gameWindow.setSize((Dimension) frame.get("Size"));
-                            gameWindow.setSelected((boolean) frame.get("Selected"));
-                            addWindow(gameWindow, 400, 400);
-                        }
-                    }
-                } catch (ClassNotFoundException ex) {
-                    ex.printStackTrace();
-                } catch (PropertyVetoException e) {
-                    e.printStackTrace();
-                } finally {
-                    ois.close();
-                }
-            } finally {
-                is.close();
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                exitApplication();
             }
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        }
+        });
+
+//        setUpClosingLogic();
     }
+    private JDesktopPane createDesktopPane() {
+        desktopPane = new JDesktopPane();
+
+        addWindow(createLogWindow(), 300, 800);
+        addWindow(new GameWindow(), 400, 400);
+
+        for (JInternalFrame frame : desktopPane.getAllFrames()) {
+            ((AbstractWindow) frame).loadWindow();
+        }
+
+        return desktopPane;
+    }
+
+
 
     protected LogWindow createLogWindow() {
         LogWindow logWindow = new LogWindow(Logger.getDefaultLogSource());
@@ -115,10 +91,19 @@ public class MainApplicationFrame extends JFrame {
             LogWindow window = new LogWindow(Logger.getDefaultLogSource());
             addWindow(window, 150, 350);
         }));
+        
+        menu.add(createMenuItem(messages.getString("Save"), KeyEvent.VK_S, KeyStroke.getKeyStroke(KeyEvent.VK_S, ActionEvent.CTRL_MASK), (event) -> {
+            callCloseDialog();
+        }));
 
         menu.add(exit());
 
         return menu;
+    }
+    private void callCloseDialog(){
+        for (JInternalFrame frame : desktopPane.getAllFrames()) {
+            ((AbstractWindow) frame).saveWindow();
+        }
     }
 
     private JMenuItem createMenuItem(String text, int mnemonic, KeyStroke accelerator, ActionListener action) {
@@ -193,26 +178,14 @@ public class MainApplicationFrame extends JFrame {
         int confirmation = JOptionPane.showConfirmDialog(this, messages.getString("ConfirmationExitQuestion"),
                 messages.getString("ConfirmationExit"), JOptionPane.YES_NO_OPTION);
         if (confirmation == JOptionPane.YES_OPTION) {
-            save();
+            int saveConfirmation = JOptionPane.showConfirmDialog(this, messages.getString("Save")+"?",
+                    messages.getString("Save")+"?", JOptionPane.YES_NO_CANCEL_OPTION);
+
+            if (saveConfirmation == JOptionPane.YES_OPTION) {
+                callCloseDialog();
+            }
+
             this.dispose();
-        }
-    }
-    private void save(){
-        ArrayList<HashMap<String, Object>> frames = new ArrayList<HashMap<String, Object>>();
-        for (JInternalFrame frame : desktopPane.getAllFrames())
-        {
-            frames.add(getProperties(frame));
-        }
-        FileOutputStream fos;
-        try {
-            fos = new FileOutputStream("./temp.out");
-            ObjectOutputStream oos;
-            oos = new ObjectOutputStream(fos);
-            oos.writeObject(frames);
-            oos.flush();
-            oos.close();
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 }
