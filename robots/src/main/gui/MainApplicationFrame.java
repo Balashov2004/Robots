@@ -1,56 +1,70 @@
+
 package gui;
 
-import java.awt.Dimension;
-import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
+import java.awt.*;
+import java.awt.event.*;
 import java.util.ResourceBundle;
 import java.util.Locale;
-
 import javax.swing.*;
-
 import log.Logger;
 
-public class MainApplicationFrame extends JFrame
-{
+public class MainApplicationFrame extends JFrame{
     Locale currentLocale = new Locale("ru", "RU");
-    ResourceBundle messages = ResourceBundle.getBundle("resources",  currentLocale);
-    private final JDesktopPane desktopPane = new JDesktopPane();
+    ResourceBundle messages = ResourceBundle.getBundle("resources", currentLocale);
+
+    private JDesktopPane desktopPane;
+
 
     public MainApplicationFrame() {
-        int inset = 50;
+        Integer indent = 50;
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-        setBounds(inset, inset,
-                screenSize.width  - inset*2,
-                screenSize.height - inset*2);
 
-        setContentPane(desktopPane);
+        final int indentedWidth = screenSize.width - indent * 2;
+        final int indentedHeight = screenSize.height - indent * 2;
 
-        LogWindow logWindow = createLogWindow();
-        addWindow(logWindow, 150, 350);
-        addWindow(new GameWindow(), 400, 400);
+        setBounds(indent, indent, indentedWidth, indentedHeight);
 
+        setContentPane(createDesktopPane());
         setJMenuBar(generateMenuBar());
         setDefaultCloseOperation(EXIT_ON_CLOSE);
+
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                exitApplication();
+            }
+        });
+
+//        setUpClosingLogic();
+    }
+    private JDesktopPane createDesktopPane() {
+        desktopPane = new JDesktopPane();
+
+        addWindow(createLogWindow(), 300, 800);
+        addWindow(new GameWindow(), 400, 400);
+
+        for (JInternalFrame frame : desktopPane.getAllFrames()) {
+            ((AbstractWindow) frame).loadWindow();
+        }
+
+        return desktopPane;
     }
 
-    protected LogWindow createLogWindow()
-    {
+
+
+    protected LogWindow createLogWindow() {
         LogWindow logWindow = new LogWindow(Logger.getDefaultLogSource());
         Logger.debug(messages.getString("ProtocolIsWorking"));
         return logWindow;
     }
 
-    protected void addWindow(JInternalFrame frame, int width, int height)
-    {
+    protected void addWindow(JInternalFrame frame, int width, int height) {
         desktopPane.add(frame);
         frame.setSize(width, height);
         frame.setVisible(true);
     }
 
-    private JMenuBar generateMenuBar()
-    {
+    private JMenuBar generateMenuBar() {
         JMenuBar menuBar = new JMenuBar();
 
         menuBar.add(createFileMenu());
@@ -77,13 +91,22 @@ public class MainApplicationFrame extends JFrame
             LogWindow window = new LogWindow(Logger.getDefaultLogSource());
             addWindow(window, 150, 350);
         }));
+        
+        menu.add(createMenuItem(messages.getString("Save"), KeyEvent.VK_S, KeyStroke.getKeyStroke(KeyEvent.VK_S, ActionEvent.CTRL_MASK), (event) -> {
+            callCloseDialog();
+        }));
 
         menu.add(exit());
 
         return menu;
     }
+    private void callCloseDialog(){
+        for (JInternalFrame frame : desktopPane.getAllFrames()) {
+            ((AbstractWindow) frame).saveWindow();
+        }
+    }
 
-    private JMenuItem createMenuItem(String text, int mnemonic, KeyStroke accelerator, ActionListener action){
+    private JMenuItem createMenuItem(String text, int mnemonic, KeyStroke accelerator, ActionListener action) {
         JMenuItem item = new JMenuItem(text);
         item.setMnemonic(mnemonic);
         item.setAccelerator(accelerator);
@@ -112,7 +135,8 @@ public class MainApplicationFrame extends JFrame
         return lookAndFeelMenu;
     }
 
-    private JMenuItem exit(){
+    private JMenuItem exit()
+    {
         JMenuItem exitMenuItem = new JMenuItem(messages.getString("Exit"));
         exitMenuItem.setMnemonic(KeyEvent.VK_Q);
         exitMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, ActionEvent.ALT_MASK));
@@ -120,7 +144,9 @@ public class MainApplicationFrame extends JFrame
             exitApplication();
         });
         return exitMenuItem;
+
     }
+
 
     private JMenu createTestMenu() {
         JMenu testMenu = new JMenu(messages.getString("Tests"));
@@ -149,9 +175,18 @@ public class MainApplicationFrame extends JFrame
         UIManager.put("OptionPane.yesButtonText", messages.getString("Yes"));
         UIManager.put("OptionPane.noButtonText", messages.getString("No"));
 
-        int confirmation = JOptionPane.showConfirmDialog(this, messages.getString("ConfirmationExitQuestion"), messages.getString("ConfirmationExit"), JOptionPane.YES_NO_OPTION);
+        int confirmation = JOptionPane.showConfirmDialog(this, messages.getString("ConfirmationExitQuestion"),
+                messages.getString("ConfirmationExit"), JOptionPane.YES_NO_OPTION);
         if (confirmation == JOptionPane.YES_OPTION) {
+            int saveConfirmation = JOptionPane.showConfirmDialog(this, messages.getString("Save")+"?",
+                    messages.getString("Save")+"?", JOptionPane.YES_NO_CANCEL_OPTION);
+
+            if (saveConfirmation == JOptionPane.YES_OPTION) {
+                callCloseDialog();
+            }
+
             this.dispose();
         }
     }
 }
+
