@@ -19,7 +19,7 @@ public abstract class AbstractWindow extends JInternalFrame implements WithState
         prefixWindowSizeHeight = formatTitle("size height");
     }
 
-    public AbstractWindow() {
+    public AbstractWindow(String окноСостоянияРобота) {
         super();
     }
 

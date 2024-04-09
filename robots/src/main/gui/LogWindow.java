@@ -15,7 +15,7 @@ public class LogWindow extends AbstractWindow implements LogChangeListener
     private final TextArea m_logContent;
 
     public LogWindow(LogWindowSource logSource) {
-        super();
+        super("Окно состояния робота");
 
         setTitle("Окно логов");
         setResizable(true);
