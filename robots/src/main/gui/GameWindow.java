@@ -1,33 +1,21 @@
 package gui;
 
-import java.awt.BorderLayout;
+
+import java.awt.*;
 import javax.swing.JPanel;
 
+import model.Robot;
 
 public class GameWindow extends AbstractWindow
 {
     private final GameVisualizer m_visualizer;
-
-    public GameWindow() {
-        super();
-
-        setTitle("Игровое окно");
-        setResizable(true);
-        setClosable(true);
-        setMaximizable(true);
-        setIconifiable(true);
-
-        m_visualizer = new GameVisualizer();
+    public GameWindow(Robot robot)
+    {
+        super("Игровое поле");
+        m_visualizer = new GameVisualizer(robot);
         JPanel panel = new JPanel(new BorderLayout());
         panel.add(m_visualizer, BorderLayout.CENTER);
         getContentPane().add(panel);
         pack();
-    }
-
-    @Override
-    public void dispose() {
-//        m_visualizer.stopTimer();
-
-        super.dispose();
     }
 }

@@ -1,5 +1,6 @@
-
 package gui;
+
+import model.Robot;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -39,9 +40,10 @@ public class MainApplicationFrame extends JFrame{
     }
     private JDesktopPane createDesktopPane() {
         desktopPane = new JDesktopPane();
-
+        Robot robot = new Robot(100, 100);
         addWindow(createLogWindow(), 300, 800);
-        addWindow(new GameWindow(), 400, 400);
+        addWindow(new GameWindow(robot), 400, 400);
+        addWindow(new CoordinatsWindow(robot), 200, 200);
 
         for (JInternalFrame frame : desktopPane.getAllFrames()) {
             ((AbstractWindow) frame).loadWindow();
@@ -82,9 +84,12 @@ public class MainApplicationFrame extends JFrame{
         menu.setMnemonic(KeyEvent.VK_D);
 
         menu.add(createMenuItem(messages.getString("NewGameWindow"), KeyEvent.VK_N, KeyStroke.getKeyStroke(KeyEvent.VK_R, ActionEvent.ALT_MASK), (event) -> {
-            GameWindow window = new GameWindow();
+            Robot robot = new Robot(100, 100);
+            GameWindow window = new GameWindow(robot);
             addWindow(window, 400, 400);
+            addWindow(new CoordinatsWindow(robot), 200, 200);
         }));
+
 
 
         menu.add(createMenuItem(messages.getString("LogsWindow"), KeyEvent.VK_L, KeyStroke.getKeyStroke(KeyEvent.VK_L, ActionEvent.ALT_MASK), (event) -> {
